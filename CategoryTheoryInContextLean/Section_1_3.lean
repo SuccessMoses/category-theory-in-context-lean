@@ -14,19 +14,19 @@ namespace CategoryInContext
 open Category
 
 -- definition 1.3.1
-class Functor (α β : Type*) [C : Category α] [D : Category β] where
+structure Functor (C : Type*) [Category C] (D : Type*) [Category D] where
   -- data
   -- map on objects
-  F : α → β
+  F : C → D
   -- map on morphisms
-  homF {X Y : α} : C.Hom X Y → D.Hom (F X) (F Y)
+  homF {X Y : C} : (Hom X Y) → (Hom (F X) (F Y))
   -- properties / laws
   -- need to qualify id to avoid clash with id in root namespace.
-  map_id (X : α) : homF (id X) = Category.id (F X)
-  map_comp {X Y Z : α} (f : C.Hom X Y) (g : C.Hom Y Z) :
+  map_id (X : C) : homF (id X) = Category.id (F X)
+  map_comp {X Y Z : C} (f : Hom X Y) (g : Hom Y Z) :
     homF (f ≫ g) = homF f ≫ homF g
 
-def EndoFunctor (α : Type*) [Category α] := @Functor α α
+def EndoFunctor (α : Type*) [Category α] := Functor α α
 
 def IdFunctor {α : Type*} [Category α] : Functor α α where
   F X := X
@@ -96,12 +96,12 @@ theorem Functor.iso_preserve {α β : Type*} [C : Category α] [D : Category β]
     rw [hf]
     rw [F.map_id]
 
--- example 1.3.9
-def g_set_left_action (α : Type*) [Group α] (β : Type*) :
-  @Functor Unit (Set β) (Category.Monoid α) _ := by sorry
+-- -- example 1.3.9
+-- def g_set_left_action (α : Type*) [Group α] (β : Type*) :
+--   @Functor Unit (Set β) (Category.Monoid α) _ := by sorry
 
-def g_set_right_action (α : Type*) [Group α] (β : Type*) :
-  @ContraFunctor Unit (Set β) (Category.Monoid α) _ := by sorry
+-- def g_set_right_action (α : Type*) [Group α] (β : Type*) :
+--   @ContraFunctor Unit (Set β) (Category.Monoid α) _ := by sorry
 
 -- todo: corollary 1.3.10, we haven't defined ⁻¹ on isomorphisms yet
 
@@ -190,39 +190,39 @@ def Functor.comp {α β γ : Type*} [C : Category α] [D : Category β] [E : Cat
   map_id X := by simp [F.map_id, G.map_id]
   map_comp f g := by simp [F.map_comp, G.map_comp]
 
-universe u v
-instance : Category Cat.{u, v} where
-  Hom C D := @Functor C.1 D.1 C.2 D.2
-  -- adding explicit letI to help typeclass resolution as suggested by Claude.
-  id C := letI := C.2; {
-    F x := x
-    homF f := f
-    map_id _ := rfl
-    map_comp _ _ := rfl
-  }
-  comp {C D E} F G := @Functor.comp C.1 D.1 E.1 C.2 D.2 E.2 F G
-  id_comp := by dsimp [Functor.comp]; simp
-  comp_id := by dsimp [Functor.comp]; simp
-  assoc := by dsimp [Functor.comp]; simp
+-- universe u v
+-- instance : Category Cat.{u, v} where
+--   Hom C D := @Functor C.1 D.1 C.2 D.2
+--   -- adding explicit letI to help typeclass resolution as suggested by Claude.
+--   id C := letI := C.2; {
+--     F x := x
+--     homF f := f
+--     map_id _ := rfl
+--     map_comp _ _ := rfl
+--   }
+--   comp {C D E} F G := @Functor.comp C.1 D.1 E.1 C.2 D.2 E.2 F G
+--   id_comp := by dsimp [Functor.comp]; simp
+--   comp_id := by dsimp [Functor.comp]; simp
+--   assoc := by dsimp [Functor.comp]; simp
 
 def Category.CatIsomorphism (C D : Cat) := Isomorphism C.1 D.1
 def Category.CatIsomorphic (C D : Cat) := Isomorphic C.1 D.1
 
 -- example 1.3.14.i
-def Op : Functor Cat Cat where
-  F C := ⟨Opposite C.1, @Category.opp (Opposite C.1) C.2⟩
-  homF {C D} F := letI := C.2; letI := D.2; {
-    F := F.F
-    homF := F.homF
-    map_id X := F.map_id X
-    map_comp f g := by
-      rw [Functor.homF]
-      repeat rw [comp]
-      simp only
-      apply F.map_comp
-  }
-  map_id C := by sorry
-  map_comp {C D E} F G := by sorry
+-- def Op : Functor Cat Cat where
+--   F C := ⟨Opposite C.1, @Category.opp (Opposite C.1) C.2⟩
+--   homF {C D} F := letI := C.2; letI := D.2; {
+--     F := F.F
+--     homF := F.homF
+--     map_id X := F.map_id X
+--     map_comp f g := by
+--       rw [Functor.homF]
+--       repeat rw [comp]
+--       simp only
+--       apply F.map_comp
+--   }
+--   map_id C := by sorry
+--   map_comp {C D E} F G := by sorry
 
 -- todo: add rest of examples from 1.3.14
 -- todo: add example 1.3.15
@@ -232,9 +232,9 @@ def Op : Functor Cat Cat where
 -- exercise 1.3.i
 -- the answer to what is a group homomorphism, but you need to
 -- provide the proof.
-theorem group_cat_functor {α β : Type*} [Group α] [Group β]
-    (F : @Functor Unit Unit (Category.Monoid α) (Category.Monoid β)) :
-    ∃ f: α →* β, ∀ x: α, F.homF (X := ()) (Y := ()) x = f x := by sorry
+-- theorem group_cat_functor {α β : Type*} [Group α] [Group β]
+--     (F : @Functor Unit Unit (Category.Monoid α) (Category.Monoid β)) :
+--     ∃ f: α →* β, ∀ x: α, F.homF (X := ()) (Y := ()) x = f x := by sorry
 
 -- exercise 1.3.ii
 -- we didn't define the category of preorders in section 1.1, so we do it here

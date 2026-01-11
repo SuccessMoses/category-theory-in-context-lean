@@ -37,6 +37,10 @@ class Category (α : Type*) where
   assoc : ∀ {W X Y Z : α} (f : Hom W X) (g : Hom X Y) (h : Hom Y Z),
     comp (comp f g) h = comp f (comp g h)
 
+infixr:10 " ⟶ " => Category.Hom
+
+scoped notation "𝟙" => Category.id  -- type as \b1
+
 -- using ≫ instead of ∘ to match mathlib.
 scoped infixr:80 " ≫ " => Category.comp -- type as \gg
 
