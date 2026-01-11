@@ -27,8 +27,6 @@ instance Category.walkingArrow : Category (Fin 2) where
 
 def nonidHom : (0 : Fin 2) ⟶ 1 := ()
 
-scoped infixr:26 " ⥤ " => Functor -- type as \func
-
 variable {C : Type*} [Category C] {D : Type*} [Category D]
 
 instance prod : Category (C × D) where
@@ -53,14 +51,14 @@ rfl
 def i₀ : C ⥤ C × (Fin 2) where
   F X := (X, 0)
   homF f := (f, Category.id _)
-  map_id := sorry
-  map_comp := sorry
+  map_id := by aesop
+  map_comp := by aesop
 
 def i₁ : C ⥤ C × (Fin 2) where
   F X := (X, 1)
   homF f := (f, Category.id _)
-  map_id := sorry
-  map_comp := sorry
+  map_id := by aesop
+  map_comp := by aesop
 
 lemma i₀_obj (X : C) : i₀.F X = (X, 0) := rfl
 
@@ -70,17 +68,14 @@ lemma i₀_map {X Y : C} (f : X ⟶ Y) : i₀.homF f = (f, 𝟙 _) := rfl
 
 lemma i₁_map {X Y : C} (f : X ⟶ Y) : i₁.homF f = (f, 𝟙 _) := rfl
 
-scoped infixr:81 " ⋙ " => Functor.comp -- type as \ggg
-
-variable {E : Type*} [Category E]
-
-lemma comp_obj (F : C ⥤ D) (G : D ⥤ E) (X : C) : (F ⋙ G).F X = G.F (F.F X) := rfl
-
-lemma comp_map (F : C ⥤ D) (G : D ⥤ E) {X Y : C} (f : X ⟶ Y) :
-  (F ⋙ G).homF f = G.homF (F.homF f) := rfl
-
 variable (F G : C ⥤ D)
 
+/--
+Lemma 1.5.1
+Fixing a pair of parallel functors F, G : C ⥤ D, natural transformations α : F → G corressponds
+bijectively to functors H : C × 𝟚 ⟶ D such that H restricts along i₀ and i₁ to the functors F and G,
+and diagram (1.5.2) commutes.
+-/
 def nattransToFunctor (H : C × (Fin 2) ⥤ D) : NaturalTransformation (i₀ ⋙ H) (i₁ ⋙ H) where
   arrow X := H.homF <| ((𝟙 X, nonidHom) : (X, (0 : Fin 2)) ⟶ (X, 1))
   naturality := by
@@ -90,3 +85,6 @@ def nattransToFunctor (H : C × (Fin 2) ⥤ D) : NaturalTransformation (i₀ ⋙
     apply hom_ext
     · simp [comp_fst, comp_id f, id_comp f]
     simp [comp_snd, i₀_obj, i₁_obj, id_comp, comp_id]
+
+
+end CategoryInContext

@@ -26,9 +26,11 @@ structure Functor (C : Type*) [Category C] (D : Type*) [Category D] where
   map_comp {X Y Z : C} (f : Hom X Y) (g : Hom Y Z) :
     homF (f ≫ g) = homF f ≫ homF g
 
-def EndoFunctor (α : Type*) [Category α] := Functor α α
+scoped infixr:26 " ⥤ " => Functor -- type as \func
 
-def IdFunctor {α : Type*} [Category α] : Functor α α where
+def EndoFunctor (α : Type*) [Category α] := α ⥤ α
+
+def IdFunctor {α : Type*} [Category α] : α ⥤ α where
   F X := X
   homF f := f
   map_id _ := rfl
@@ -183,27 +185,40 @@ def Hom_bifunctor (α : Type*) [C : Category α] : Functor (Opposite α × α) T
 def Cat.{u, v} : Type (max (u+1) (v+1)) :=
   Σ (α : Type u), Category.{u, v} α
 
-def Functor.comp {α β γ : Type*} [C : Category α] [D : Category β] [E : Category γ]
-    (F : Functor α β) (G : Functor β γ) : Functor α γ where
-  F x := G.F (F.F x)
-  homF f := G.homF (F.homF f)
-  map_id X := by simp [F.map_id, G.map_id]
-  map_comp f g := by simp [F.map_comp, G.map_comp]
+instance : CoeSort Cat (Type*) where
+  coe C := C.1
 
--- universe u v
--- instance : Category Cat.{u, v} where
---   Hom C D := @Functor C.1 D.1 C.2 D.2
---   -- adding explicit letI to help typeclass resolution as suggested by Claude.
---   id C := letI := C.2; {
---     F x := x
---     homF f := f
---     map_id _ := rfl
---     map_comp _ _ := rfl
---   }
---   comp {C D E} F G := @Functor.comp C.1 D.1 E.1 C.2 D.2 E.2 F G
---   id_comp := by dsimp [Functor.comp]; simp
---   comp_id := by dsimp [Functor.comp]; simp
---   assoc := by dsimp [Functor.comp]; simp
+instance (C : Cat) : Category C := C.2
+
+def Functor.comp {C : Type*} {D : Type*} {E : Type*} [Category C] [Category D] [Category E]
+  (F : C ⥤ D) (G : D ⥤ E) : C ⥤ E where
+  F X := G.F (F.F X)
+  homF f := G.homF (F.homF f)
+  map_id := by
+    intro X
+    simp [Functor.map_id]
+  map_comp := by
+    intros X Y Z f g
+    simp [Functor.map_comp]
+
+scoped infixr:81 " ⋙ " => Functor.comp -- type as \ggg
+
+variable {C : Type*} [Category C] {D : Type*} [Category D] {E : Type*} [Category E]
+
+lemma comp_obj (F : C ⥤ D) (G : D ⥤ E) (X : C) : (F ⋙ G).F X = G.F (F.F X) := rfl
+
+lemma comp_map (F : C ⥤ D) (G : D ⥤ E) {X Y : C} (f : X ⟶ Y) :
+  (F ⋙ G).homF f = G.homF (F.homF f) := rfl
+
+universe u v
+instance : Category Cat.{u, v} where
+  Hom C D := (C ⥤ D)
+  id C := IdFunctor
+  comp F G := F ⋙ G
+  -- these are almost definitionally equal so it is a good idea to automate the tedious proof
+  id_comp F := by aesop
+  comp_id F := by aesop
+  assoc F G H := by aesop
 
 def Category.CatIsomorphism (C D : Cat) := Isomorphism C.1 D.1
 def Category.CatIsomorphic (C D : Cat) := Isomorphic C.1 D.1
