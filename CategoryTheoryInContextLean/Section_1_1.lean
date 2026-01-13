@@ -113,10 +113,14 @@ variable {α : Type*} [Category α]
 -- definition 1.1.9
 -- we defined structure and a prop separate, as they might be useful separately
 structure Category.Isomorphism (X Y : α) where
-  f : Hom X Y
-  inv : Hom Y X
-  hom_inv_id : f ≫ inv = id X
-  inv_hom_id : inv ≫ f = id Y
+  f : X ⟶ Y
+  inv : Y ⟶ X
+  hom_inv_id : f ≫ inv = 𝟙 _
+  inv_hom_id : inv ≫ f = 𝟙 _
+
+/-- Notation for an isomorphism in a category. -/
+infixr:10 " ≅ " => Category.Isomorphism -- type as \cong or \iso
+
 
 def Category.id_iso (X : α) : Category.Isomorphism X X :=
   { f := Category.id X

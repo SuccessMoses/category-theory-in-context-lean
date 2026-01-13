@@ -30,11 +30,14 @@ scoped infixr:26 " ⥤ " => Functor -- type as \func
 
 def EndoFunctor (α : Type*) [Category α] := α ⥤ α
 
-def IdFunctor {α : Type*} [Category α] : α ⥤ α where
+def IdFunctor (α : Type*) [Category α] : α ⥤ α where
   F X := X
   homF f := f
   map_id _ := rfl
   map_comp _ _ := rfl
+
+/-- Notation for the identity functor on a category. -/
+scoped notation "𝟭" => IdFunctor -- Type this as `\sb1`
 
 -- examples 1.3.2.i
 def PowerSetFunctor : Functor Type Type where
@@ -213,7 +216,7 @@ lemma comp_map (F : C ⥤ D) (G : D ⥤ E) {X Y : C} (f : X ⟶ Y) :
 universe u v
 instance : Category Cat.{u, v} where
   Hom C D := (C ⥤ D)
-  id C := IdFunctor
+  id C := IdFunctor _
   comp F G := F ⋙ G
   -- these are almost definitionally equal so it is a good idea to automate the tedious proof
   id_comp F := by aesop

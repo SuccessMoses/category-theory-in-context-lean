@@ -25,7 +25,7 @@ def IsNatIso {α β : Type*} [C : Category α] [D : Category β]
   ∀ (X : α), IsIso (η.arrow X)
 
 -- example 1.4.3iii
-def NatTrans_Id_PowerSet : NaturalTransformation IdFunctor PowerSetFunctor where
+def NatTrans_Id_PowerSet : NaturalTransformation (𝟭 _) PowerSetFunctor where
   arrow X := fun x => ({x} : Set X)
   naturality {X Y} f := by
     funext x
